@@ -23,3 +23,4 @@ struct ShortenRequest{
 async fn shorten(Json(payload): Json<ShortenRequest>){
     print!("wip")
 }
+
