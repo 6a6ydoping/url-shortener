@@ -1,26 +1,36 @@
 use axum::{
-    extract::Json,
-    routing::{get, patch, post},
-    Router,
+    extract::Json, response::IntoResponse, routing::{get, post}, Router
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use rand::{distr::Alphanumeric, Rng};
+
+mod storage;
+
 
 #[tokio::main]
 async fn main() {
+    
     let app = Router::new()
-        .route("/shorten", post(|| async {"Hello world!"}))
+        .route("/shorten", post(shorten))
         .route("/", get(|| async {"Hello!"}));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize,Serialize)]
 struct ShortenRequest{
     url: String,
 }
 
-async fn shorten(Json(payload): Json<ShortenRequest>){
-    print!("wip")
+async fn shorten(Json(payload): Json<ShortenRequest>) -> impl IntoResponse{
+    Json(payload)
 }
 
+fn generate_short_id() -> String {
+    rand::rng()
+        .sample_iter(&Alphanumeric)
+        .take(6)
+        .map(char::from)
+        .collect()
+}
